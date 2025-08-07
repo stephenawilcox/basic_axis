@@ -38,7 +38,7 @@ always @ (*) begin
 			next_state = SEND;
 		end
 		SEND: begin
-			next_state = (M_AXIS_TVALID & M_AXIS_TREADY) ? (fifo_empty ? IDLE : READ) : SEND;
+			next_state = (M_AXIS_TVALID & M_AXIS_TREADY) ? (fifo_empty ? IDLE : SEND) : SEND;
 		end
 		default:
 			next_state <= IDLE;
@@ -57,24 +57,28 @@ end
 
 // STATE OUTPUT LOGIC
 always @ (*) begin
-	case (current_state)
-		IDLE: begin
-			fifo_rd_en = 1'b0;
-			M_AXIS_TVALID = 1'b0;
-		end
-		READ: begin
-			fifo_rd_en = 1'b1;
-			M_AXIS_TVALID = 1'b0;
-		end
-		SEND: begin
-			fifo_rd_en = 1'b0;
-			M_AXIS_TVALID = 1'b1;
-		end
-		default: begin
-			fifo_rd_en = 1'b0;
-			M_AXIS_TVALID = 1'b0;
-		end
-	endcase
+
+	M_AXIS_TVALID = current_state[2];
+	fifo_rd_en = fifo_empty ? 1'b0 : (current_state[1] ? 1'b1 : (M_AXIS_TVALID & M_AXIS_TREADY));
+
+	// case (current_state)
+	// 	IDLE: begin
+	// 		fifo_rd_en = 1'b0;
+	// 		M_AXIS_TVALID = 1'b0;
+	// 	end
+	// 	READ: begin
+	// 		fifo_rd_en = 1'b1;
+	// 		M_AXIS_TVALID = 1'b0;
+	// 	end
+	// 	SEND: begin
+	// 		fifo_rd_en = 1'b0;
+	// 		M_AXIS_TVALID = 1'b1;
+	// 	end
+	// 	default: begin
+	// 		fifo_rd_en = 1'b0;
+	// 		M_AXIS_TVALID = 1'b0;
+	// 	end
+	// endcase
 end
 
 endmodule
