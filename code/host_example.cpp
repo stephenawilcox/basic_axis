@@ -29,6 +29,8 @@ Associated Filename: main.c
 #include <CL/cl_ext.h>
 #include "/<path-to>/XRT/src/runtime_src/core/include/xclhal2.h"
 
+#include <chrono>
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #define NUM_WORKGROUPS (1)
@@ -266,59 +268,80 @@ int main(int argc, char** argv)
     }
 
 
-    // Set the arguments to our compute kernel
-    // cl_uint vector_length = MAX_LENGTH;
-    err = 0;
-    cl_uint d_mode = 0;
-    err |= clSetKernelArg(kernel, 0, sizeof(cl_uint), &d_mode); // Not used in example RTL logic.
-    err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_axi00_ptr0); 
+    auto start_time = std::chrono::high_resolution_clock::now();
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    int num_iterations = 0;
 
-    if (err != CL_SUCCESS) {
-        printf("ERROR: Failed to set kernel arguments! %d\n", err);
-        printf("ERROR: Test failed\n");
-        return EXIT_FAILURE;
-    }
+    while(duration.count() < 1000000) {
+        // Set the arguments to our compute kernel
+        // cl_uint vector_length = MAX_LENGTH;
+        err = 0;
+        cl_uint d_mode = 0;
+        err |= clSetKernelArg(kernel, 0, sizeof(cl_uint), &d_mode); // Not used in example RTL logic.
+        err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_axi00_ptr0); 
 
-    size_t global[1];
-    size_t local[1];
-    // Execute the kernel over the entire range of our 1d input data set
-    // using the maximum number of work group items for this device
-
-    global[0] = 1;
-    local[0] = 1;
-    err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, (size_t*)&global, (size_t*)&local, 0, NULL, NULL);
-    if (err) {
-        printf("ERROR: Failed to execute kernel! %d\n", err);
-        printf("ERROR: Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-    clFinish(commands);
-
-
-    // Read back the results from the device to verify the output
-    //
-    cl_event readevent;
-
-    err = 0;
-    err |= clEnqueueReadBuffer( commands, d_axi00_ptr0, CL_TRUE, 0, sizeof(cl_uint) * number_of_words, h_axi00_ptr0_output, 0, NULL, &readevent );
-
-
-    if (err != CL_SUCCESS) {
-        printf("ERROR: Failed to read output array! %d\n", err);
-        printf("ERROR: Test failed\n");
-        return EXIT_FAILURE;
-    }
-    clWaitForEvents(1, &readevent);
-    // Check Results
-
-    for (cl_uint i = 0; i < number_of_words; i++) {
-        if ((h_data[i]) != h_axi00_ptr0_output[i]) {
-            printf("ERROR in basic_axis::m00_axi - array index %d (host addr 0x%03x) - input=%d (0x%x), output=%d (0x%x)\n", i, i*4, h_data[i], h_data[i], h_axi00_ptr0_output[i], h_axi00_ptr0_output[i]);
-            check_status = 1;
+        if (err != CL_SUCCESS) {
+            printf("ERROR: Failed to set kernel arguments! %d\n", err);
+            printf("ERROR: Test failed\n");
+            return EXIT_FAILURE;
         }
-      //  printf("i=%d, input=%d, output=%d\n", i,  h_axi00_ptr0_input[i], h_axi00_ptr0_output[i]);
+
+        size_t global[1];
+        size_t local[1];
+        // Execute the kernel over the entire range of our 1d input data set
+        // using the maximum number of work group items for this device
+
+        global[0] = 1;
+        local[0] = 1;
+        err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, (size_t*)&global, (size_t*)&local, 0, NULL, NULL);
+        if (err) {
+            printf("ERROR: Failed to execute kernel! %d\n", err);
+            printf("ERROR: Test failed\n");
+            return EXIT_FAILURE;
+        }
+
+        clFinish(commands);
+
+
+        // Read back the results from the device to verify the output
+        //
+        cl_event readevent;
+
+        err = 0;
+        err |= clEnqueueReadBuffer( commands, d_axi00_ptr0, CL_TRUE, 0, sizeof(cl_uint) * number_of_words, h_axi00_ptr0_output, 0, NULL, &readevent );
+
+
+        if (err != CL_SUCCESS) {
+            printf("ERROR: Failed to read output array! %d\n", err);
+            printf("ERROR: Test failed\n");
+            return EXIT_FAILURE;
+        }
+        clWaitForEvents(1, &readevent);
+        // Check Results
+
+        for (cl_uint i = 0; i < number_of_words; i++) {
+            if ((h_data[i]) != h_axi00_ptr0_output[i]) {
+                printf("ERROR in basic_axis::m00_axi - array index %d (host addr 0x%03x) - input=%d (0x%x), output=%d (0x%x)\n", i, i*4, h_data[i], h_data[i], h_axi00_ptr0_output[i], h_axi00_ptr0_output[i]);
+                check_status = 1;
+            }
+        //  printf("i=%d, input=%d, output=%d\n", i,  h_axi00_ptr0_input[i], h_axi00_ptr0_output[i]);
+        }
+
+        end_time = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+        num_iterations++;
     }
+
+    int num_KB_transferred = (16 * num_iterations);
+    int num_MB_transferred = num_KB_transferred / 1000;
+
+    printf("The number of iterations ran is %d and it took %ld micro seconds\n", num_iterations, duration.count());
+
+    printf("Each transfer is 4096 integers which is 16KB of data so the amount of data tranferred between the PS and PL is 16KB * num_iterations = %d KB\n", num_KB_transferred);
+
+    printf("The AXI4 Stream can handle about %d MB per second of data\n", num_MB_transferred);
 
 
     //--------------------------------------------------------------------------
