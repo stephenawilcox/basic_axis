@@ -69,7 +69,7 @@ module basic_axis_top #
 	);
 
 
-//Instantiation of Async FIFO
+//Instantiation of sync FIFO
 	sfifo # (.num_entries(FIFO_ENTRIES), .num_data_bits(C_M00_AXIS_TDATA_WIDTH)) sfifo_inst (
 		.clk(s00_axis_aclk),
 		.resetn(s00_axis_areset),
