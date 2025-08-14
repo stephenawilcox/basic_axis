@@ -8,7 +8,7 @@ module master_stream_M00_AXIS #
     // Global ports
     input wire  M_AXIS_ACLK,
     // 
-    input wire  M_AXIS_ARESETN,
+    input wire  M_AXIS_ARESET,
     // Master Stream Ports. TVALID indicates that the master is driving a valid transfer, A transfer takes place when both TVALID and TREADY are asserted. 
     output reg  M_AXIS_TVALID,
     // TDATA is the primary payload that is used to provide the data that is passing across the interface from the master.
@@ -47,7 +47,7 @@ end
 
 
 always @ (posedge M_AXIS_ACLK) begin
-	if (!M_AXIS_ARESETN) begin
+	if (M_AXIS_ARESET) begin
 		current_state <= IDLE;
 	end
 	else begin

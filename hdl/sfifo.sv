@@ -3,21 +3,22 @@
  */
 `timescale 1 ns / 1 ps
 
-module sfifo (clk, resetn, fifo_rd_en, fifo_wr_en, fifo_in, fifo_out, fifo_full, fifo_empty);
-    //FIFO depth = B - B * freq_rd / freq_wr
-    //B num data bits
-    parameter num_entries = 8;
-    parameter num_data_bits = 32;
-    localparam num_ptr_bits = $clog2(num_entries);
+module sfifo (
+    parameter num_entries = 8,
+    parameter num_data_bits = 32
+    )
+    (
+    input clk,
+    input reset,
+    input fifo_rd_en,
+    input fifo_wr_en,
+    input [num_data_bits-1:0] fifo_in,
+    output reg [num_data_bits-1:0] fifo_out,
+    output fifo_full,
+    output fifo_empty
+    );
 
-    input clk;
-    input resetn;
-    input fifo_rd_en;
-    input fifo_wr_en;
-    input [num_data_bits-1:0] fifo_in;
-    output reg [num_data_bits-1:0] fifo_out;
-    output fifo_full;
-    output fifo_empty;
+    localparam num_ptr_bits = $clog2(num_entries);
 
     reg [num_data_bits-1:0] data [num_entries];
     logic [num_ptr_bits:0] rd_ptr;
@@ -28,7 +29,7 @@ module sfifo (clk, resetn, fifo_rd_en, fifo_wr_en, fifo_in, fifo_out, fifo_full,
 
 
     always @(posedge clk) begin
-        if(!resetn) begin
+        if(reset) begin
             rd_ptr <= 0;
             wr_ptr <= 0;
             fifo_out <= 0;

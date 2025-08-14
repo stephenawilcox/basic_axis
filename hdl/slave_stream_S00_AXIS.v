@@ -8,7 +8,7 @@ module slave_stream_S00_AXIS #
     // AXI4Stream sink: Clock
     input wire  S_AXIS_ACLK,
     // AXI4Stream sink: Reset
-    input wire  S_AXIS_ARESETN,
+    input wire  S_AXIS_ARESET,
     // Ready to accept data in
     output reg  S_AXIS_TREADY,
     // Data in
@@ -36,7 +36,7 @@ always @ (*) begin
 end
 
 always @ (posedge S_AXIS_ACLK) begin
-    if (!S_AXIS_ARESETN) begin
+    if (S_AXIS_ARESET) begin
         current_state <= IDLE;
     end
     else begin
