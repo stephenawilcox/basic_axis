@@ -141,12 +141,12 @@ basic_axis_top #(
 )
 inst_bat (
     .s00_axis_aclk(kernel_clk),
-    .s00_axis_aresetn(kernel_rst),
+    .s00_axis_areset(kernel_rst),
     .s00_axis_tdata(rd_tdata),
     .s00_axis_tvalid(rd_tvalid),
     .s00_axis_tready(rd_tready),
     .m00_axis_aclk(kernel_clk),
-    .m00_axis_aresetn(kernel_rst),
+    .m00_axis_areset(kernel_rst),
     .m00_axis_tdata(adder_tdata),
     .m00_axis_tvalid(adder_tvalid),
     .m00_axis_tready(adder_tready)

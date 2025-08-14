@@ -45,7 +45,7 @@ module basic_axis_top #
 		.C_S_AXIS_TDATA_WIDTH(C_S00_AXIS_TDATA_WIDTH)
 	) slave_stream_S00_AXIS_inst (
 		.S_AXIS_ACLK(s00_axis_aclk),
-		.S_AXIS_ARESETN(s00_axis_areset),
+		.S_AXIS_ARESET(s00_axis_areset),
 		.S_AXIS_TREADY(s00_axis_tready),
 		.S_AXIS_TDATA(s00_axis_tdata),
 		.S_AXIS_TVALID(s00_axis_tvalid),
@@ -59,7 +59,7 @@ module basic_axis_top #
 		.C_M_AXIS_TDATA_WIDTH(C_M00_AXIS_TDATA_WIDTH)
 	) master_stream_M00_AXIS_inst (
 		.M_AXIS_ACLK(m00_axis_aclk),
-		.M_AXIS_ARESETN(m00_axis_areset),
+		.M_AXIS_ARESET(m00_axis_areset),
 		.M_AXIS_TVALID(m00_axis_tvalid),
 		.M_AXIS_TDATA(m00_axis_tdata),
 		.M_AXIS_TREADY(m00_axis_tready),
@@ -72,7 +72,7 @@ module basic_axis_top #
 //Instantiation of sync FIFO
 	sfifo # (.num_entries(FIFO_ENTRIES), .num_data_bits(C_M00_AXIS_TDATA_WIDTH)) sfifo_inst (
 		.clk(s00_axis_aclk),
-		.resetn(s00_axis_areset),
+		.reset(s00_axis_areset),
 		.fifo_rd_en(w_fifo_rd_en),
 		.fifo_wr_en(w_fifo_wr_en),
 		.fifo_in(in_axis_data),
