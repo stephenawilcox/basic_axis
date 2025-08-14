@@ -3,9 +3,9 @@
  */
 `timescale 1 ns / 1 ps
 
-module sfifo (
-    parameter num_entries = 8,
-    parameter num_data_bits = 32
+module sfifo #(
+    parameter integer num_entries = 8,
+    parameter integer num_data_bits = 32
     )
     (
     input clk,
